@@ -1,0 +1,57 @@
+[
+    {
+      "id": 1,
+      "title": "The Great Gatsby",
+      "author": "F. Scott Fitzgerald",
+      "genre": "Classic",
+      "year": 1925,
+      "rating": 4.4,
+      "copies_sold": 25000000,
+      "in_stock": true,
+      "languages": ["English", "Spanish", "French"]
+    },
+    {
+      "id": 2,
+      "title": "1984",
+      "author": "George Orwell",
+      "genre": "Science Fiction",
+      "year": 1949,
+      "rating": 4.7,
+      "copies_sold": 30000000,
+      "in_stock": true,
+      "languages": ["English", "German", "Russian"]
+    },
+    {
+      "id": 3,
+      "title": "To Kill a Mockingbird",
+      "author": "Harper Lee",
+      "genre": "Classic",
+      "year": 1960,
+      "rating": 4.8,
+      "copies_sold": 40000000,
+      "in_stock": true,
+      "languages": ["English", "Spanish", "Italian"]
+    },
+    {
+      "id": 4,
+      "title": "The Hobbit",
+      "author": "J.R.R. Tolkien",
+      "genre": "Fantasy",
+      "year": 1937,
+      "rating": 4.6,
+      "copies_sold": 100000000,
+      "in_stock": true,
+      "languages": ["English", "French", "German", "Spanish"]
+    },
+    {
+      "id": 5,
+      "title": "Dune",
+      "author": "Frank Herbert",
+      "genre": "Science Fiction",
+      "year": 1965,
+      "rating": 4.5,
+      "copies_sold": 20000000,
+      "in_stock": false,
+      "languages": ["English", "Japanese"]
+    }
+  ]

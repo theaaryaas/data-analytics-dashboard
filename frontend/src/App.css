@@ -1,0 +1,42 @@
+/* Ant Design v5 uses CSS-in-JS, no need to import reset.css */
+
+.app-container {
+  min-height: 100vh;
+  background-color: #f0f2f5;
+}
+
+.site-layout-background {
+  background: #fff;
+  padding: 24px;
+  min-height: 360px;
+  border-radius: 8px;
+}
+
+.stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.file-upload-area {
+  border: 2px dashed #1890ff;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  background: #fafafa;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.file-upload-area:hover {
+  border-color: #40a9ff;
+  background: #e6f7ff;
+}
+
+.chart-container {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
