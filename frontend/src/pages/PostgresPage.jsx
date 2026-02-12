@@ -123,12 +123,6 @@ const PostgresPage = () => {
       key: 'row_count',
     },
     {
-      title: 'Uploaded',
-      dataIndex: 'uploaded_at',
-      key: 'uploaded_at',
-      render: (date) => new Date(date).toLocaleString(),
-    },
-    {
       title: 'Actions',
       key: 'actions',
       render: (_, record) => (
@@ -243,12 +237,6 @@ const PostgresPage = () => {
                 <Statistic
                   title="Columns"
                   value={selectedFile.columns ? selectedFile.columns.length : 0}
-                />
-              </Col>
-              <Col span={6}>
-                <Statistic
-                  title="Uploaded"
-                  value={selectedFile.uploaded_at ? new Date(selectedFile.uploaded_at).toLocaleString() : ''}
                 />
               </Col>
             </Row>

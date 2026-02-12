@@ -13,7 +13,7 @@ from postgres_service import postgres
 
 os.makedirs("uploads", exist_ok=True)
 app = FastAPI(title="Simple Data Analytics Dashboard", description="Upload and analyze CSV, Excel, and JSON files", version="1.0.0")
-app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000", "http://localhost:5173"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:5176"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 data_store = DataStore()
 
 ALLOWED_EXTENSIONS = ['.csv', '.xlsx', '.xls', '.json']
@@ -73,6 +73,44 @@ def get_file(file_id: int):
     except HTTPException:
         raise
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/files/{file_id}")
+def delete_file(file_id: int):
+    try:
+        print(f"Delete request received for file_id: {file_id} (type: {type(file_id)})")
+        file_data = data_store.get_file_by_id(file_id)
+        if not file_data:
+            print(f"File with id {file_id} not found")
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        filename = file_data['filename']
+        print(f"Deleting file: {filename} (id: {file_id})")
+        
+        # Delete from database
+        deleted = data_store.delete_file(file_id)
+        if not deleted:
+            print(f"Failed to delete file {file_id} from database")
+            raise HTTPException(status_code=500, detail="Failed to delete file from database")
+        
+        print(f"Successfully deleted file {file_id} from database")
+        
+        # Delete physical file if it exists
+        file_path = f"uploads/{filename}"
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+                print(f"Deleted physical file: {file_path}")
+            except Exception as e:
+                print(f"Warning: Could not delete physical file {file_path}: {e}")
+        else:
+            print(f"Physical file not found: {file_path}")
+        
+        return {"success": True, "message": f"File {filename} deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error deleting file {file_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/analyze/{file_id}")

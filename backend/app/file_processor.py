@@ -3,6 +3,7 @@ import json
 import os
 from typing import Dict, Any, List
 import io
+from datetime import datetime
 
 class FileProcessor:
     """Handles CSV, Excel, and JSON file processing"""
@@ -11,8 +12,12 @@ class FileProcessor:
     def process_csv(file_content: bytes) -> Dict[str, Any]:
         """Process CSV file"""
         try:
-            # Read CSV from bytes
-            df = pd.read_csv(io.BytesIO(file_content))
+            # Read CSV from bytes - don't auto-parse dates to avoid timestamp issues
+            df = pd.read_csv(io.BytesIO(file_content), parse_dates=False)
+            # Convert any datetime columns that pandas might have detected to strings
+            for col in df.columns:
+                if pd.api.types.is_datetime64_any_dtype(df[col]):
+                    df[col] = df[col].astype(str)
             return FileProcessor._prepare_response(df)
         except Exception as e:
             raise ValueError(f"CSV processing error: {str(e)}")
@@ -21,8 +26,12 @@ class FileProcessor:
     def process_excel(file_content: bytes) -> Dict[str, Any]:
         """Process Excel file"""
         try:
-            # Read Excel from bytes
-            df = pd.read_excel(io.BytesIO(file_content))
+            # Read Excel from bytes - don't auto-parse dates to avoid timestamp issues
+            df = pd.read_excel(io.BytesIO(file_content), parse_dates=False)
+            # Convert any datetime columns that pandas might have detected to strings
+            for col in df.columns:
+                if pd.api.types.is_datetime64_any_dtype(df[col]):
+                    df[col] = df[col].astype(str)
             return FileProcessor._prepare_response(df)
         except Exception as e:
             raise ValueError(f"Excel processing error: {str(e)}")
@@ -52,6 +61,26 @@ class FileProcessor:
             raise ValueError(f"JSON processing error: {str(e)}")
     
     @staticmethod
+    def _convert_timestamps(obj):
+        """Recursively convert Timestamp and datetime objects to strings"""
+        if isinstance(obj, pd.Timestamp):
+            # Convert to string format (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)
+            return obj.strftime('%Y-%m-%d' if obj.hour == 0 and obj.minute == 0 and obj.second == 0 else '%Y-%m-%d %H:%M:%S')
+        elif isinstance(obj, datetime):
+            return obj.strftime('%Y-%m-%d' if obj.hour == 0 and obj.minute == 0 and obj.second == 0 else '%Y-%m-%d %H:%M:%S')
+        elif hasattr(obj, 'dtype') and pd.api.types.is_datetime64_any_dtype(obj):
+            # Handle datetime64 numpy types
+            return str(obj)
+        elif isinstance(obj, dict):
+            return {key: FileProcessor._convert_timestamps(value) for key, value in obj.items()}
+        elif isinstance(obj, list):
+            return [FileProcessor._convert_timestamps(item) for item in obj]
+        elif pd.isna(obj):
+            return None
+        else:
+            return obj
+    
+    @staticmethod
     def _prepare_response(df: pd.DataFrame) -> Dict[str, Any]:
         """Prepare standardized response from DataFrame"""
         # Basic statistics
@@ -65,14 +94,22 @@ class FileProcessor:
                     'std': float(df[column].std())
                 }
         
+        # Convert DataFrame to dict and handle timestamps
+        preview_dict = df.head(100).to_dict(orient='records')
+        sample_dict = df.head(5).to_dict(orient='records')
+        
+        # Convert any Timestamp objects to strings
+        preview_dict = FileProcessor._convert_timestamps(preview_dict)
+        sample_dict = FileProcessor._convert_timestamps(sample_dict)
+        
         return {
             'columns': df.columns.tolist(),
             'dtypes': {col: str(dtype) for col, dtype in df.dtypes.items()},
-            'preview': df.head(100).to_dict(orient='records'),
+            'preview': preview_dict,
             'row_count': int(len(df)),
             'column_count': int(len(df.columns)),
             'stats': stats,
-            'sample_data': df.head(5).to_dict(orient='records')
+            'sample_data': sample_dict
         }
     
     @staticmethod

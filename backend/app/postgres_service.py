@@ -78,8 +78,10 @@ class PostgresService:
         """Save file info to PostgreSQL"""
         try:
             preview_data = data.get('preview', [])[:10]
-            self.cursor.execute("INSERT INTO uploaded_files (filename, file_type, columns, row_count, preview_data) VALUES (%s, %s, %s, %s, %s) RETURNING id",
-                (filename, file_type, ",".join(data.get('columns', [])), data.get('row_count', 0), json.dumps(preview_data) if preview_data else None))
+            # Use Python's local datetime instead of PostgreSQL's CURRENT_TIMESTAMP
+            current_time = datetime.now()
+            self.cursor.execute("INSERT INTO uploaded_files (filename, file_type, columns, row_count, uploaded_at, preview_data) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
+                (filename, file_type, ",".join(data.get('columns', [])), data.get('row_count', 0), current_time, json.dumps(preview_data) if preview_data else None))
             file_id = self.cursor.fetchone()[0]
             self.conn.commit()
             print(f"✅ Saved {filename} to PostgreSQL (ID: {file_id})")

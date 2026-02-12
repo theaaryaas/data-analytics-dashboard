@@ -5,8 +5,6 @@ import {
 } from 'antd'
 import { 
   EyeOutlined, 
-  DeleteOutlined, 
-  DownloadOutlined,
   FileExcelOutlined,
   FileTextOutlined,
   FileOutlined
@@ -57,14 +55,41 @@ const DataSources = ({ showUploader = false }) => {
   }
 
   const confirmDelete = async () => {
-    try {
-      // Note: In real implementation, you would call DELETE endpoint
-      message.success(`Deleted ${fileToDelete.filename}`)
+    console.log('confirmDelete called!', { fileToDelete, deleteModalVisible })
+    
+    if (!fileToDelete || !fileToDelete.id) {
+      console.error('No fileToDelete or fileToDelete.id')
+      message.error('No file selected for deletion')
       setDeleteModalVisible(false)
-      setFileToDelete(null)
-      fetchFiles() // Refresh list
+      return
+    }
+
+    try {
+      setLoading(true)
+      console.log('Attempting to delete file:', fileToDelete.id, fileToDelete.filename)
+      const response = await axios.delete(`/api/files/${fileToDelete.id}`)
+      console.log('Delete response:', response)
+      console.log('Delete response data:', response.data)
+      
+      if (response.data && response.data.success) {
+        // Immediately remove from local state for better UX
+        setFiles(prevFiles => prevFiles.filter(file => file.id !== fileToDelete.id))
+        message.success(`Deleted ${fileToDelete.filename}`)
+        setDeleteModalVisible(false)
+        setFileToDelete(null)
+        // Also refresh from server to ensure consistency
+        await fetchFiles()
+      } else {
+        console.error('Unexpected response format:', response.data)
+        message.error('Delete failed: Unexpected response format')
+      }
     } catch (error) {
-      message.error('Delete failed')
+      console.error('Delete error details:', error)
+      console.error('Error response:', error.response)
+      const errorMessage = error.response?.data?.detail || error.response?.data?.message || error.message || 'Unknown error'
+      message.error('Delete failed: ' + errorMessage)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -104,39 +129,16 @@ const DataSources = ({ showUploader = false }) => {
       render: (count) => <Tag color="geekblue">{count.toLocaleString()}</Tag>,
     },
     {
-      title: 'Uploaded',
-      dataIndex: 'uploaded_at',
-      key: 'uploaded_at',
-      render: (date) => new Date(date).toLocaleDateString(),
-    },
-    {
       title: 'Actions',
       key: 'actions',
       render: (_, record) => (
-        <Space size="small">
-          <Button 
-            icon={<EyeOutlined />} 
-            size="small"
-            onClick={() => handlePreview(record)}
-          >
-            Preview
-          </Button>
-          <Button 
-            icon={<DownloadOutlined />} 
-            size="small"
-            disabled // Implement download later
-          >
-            Download
-          </Button>
-          <Button 
-            icon={<DeleteOutlined />} 
-            size="small"
-            danger
-            onClick={() => handleDelete(record)}
-          >
-            Delete
-          </Button>
-        </Space>
+        <Button 
+          icon={<EyeOutlined />} 
+          size="small"
+          onClick={() => handlePreview(record)}
+        >
+          Preview
+        </Button>
       ),
     },
   ]
@@ -207,12 +209,6 @@ const DataSources = ({ showUploader = false }) => {
               <Col span={6}>
                 <Statistic title="Columns" value={selectedFile.columns.length} />
               </Col>
-              <Col span={6}>
-                <Statistic 
-                  title="Uploaded" 
-                  value={new Date(selectedFile.uploaded_at).toLocaleDateString()} 
-                />
-              </Col>
             </Row>
             
             <DataTable
@@ -234,9 +230,14 @@ const DataSources = ({ showUploader = false }) => {
         title="Confirm Delete"
         open={deleteModalVisible}
         onOk={confirmDelete}
-        onCancel={() => setDeleteModalVisible(false)}
+        onCancel={() => {
+          setDeleteModalVisible(false)
+          setFileToDelete(null)
+        }}
         okText="Delete"
         okType="danger"
+        confirmLoading={loading}
+        maskClosable={false}
       >
         <p>Are you sure you want to delete <strong>{fileToDelete?.filename}</strong>?</p>
         <p>This action cannot be undone.</p>
