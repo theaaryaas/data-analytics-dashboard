@@ -1,6 +1,5 @@
 FROM python:3.10-slim
 
-# Put us inside the same structure you use locally (inside backend/app)
 WORKDIR /app/app
 
 COPY requirements.txt ../

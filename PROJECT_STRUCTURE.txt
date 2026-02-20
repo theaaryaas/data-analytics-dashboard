@@ -1,0 +1,107 @@
+data-analytics-dashboard/
+Project Structure Overview
+
+Backend (FastAPI)
+├── backend/
+  ├── app/  # flat structure
+    ├── main.py  # FastAPI entry point
+    ├── data_store.py  # SQLite operations
+    ├── file_processor.py  # CSV / Excel / JSON
+    ├── simple_metrics.py  # Prometheus metrics
+    ├── mongodb_service.py  # MongoDB integration
+    ├── opensearch_service.py  # OpenSearch integration
+    ├── postgres_service.py  # PostgreSQL integration
+    ├── data_files.db  # SQLite database file
+    └── uploads/  # uploaded file storage
+  ├── Dockerfile
+  └── requirements.txt
+
+Frontend (Angular 17)
+├── frontend/src/app/
+  ├── app.component.ts  # root component
+  ├── app.routes.ts  # routing
+  │ 
+  ├── components/  # reusable UI
+    ├── background-decoration/
+    ├── chart-renderer/
+    ├── data-table/
+    ├── file-card/
+    ├── file-upload/
+    ├── logo/
+    └── stat-card/
+  │ 
+  ├── pages/  # route-level views
+    ├── dashboard/
+    ├── data-sources/
+    ├── login/  &  sign-up/  # auth pages
+    ├── mongodb-page/
+    ├── opensearch-page/
+    ├── postgres-page/
+    ├── profile/
+    └── simple-monitoring/
+  │ 
+  ├── services/
+    ├── api.service.ts  # HTTP API
+    └── auth.service.ts  # authentication
+  ├── guards/auth.guard.ts  # route protection
+  └── layout/layout.component.ts
+│ 
+└── frontend/  # config files
+  ├── angular.json  •  tsconfig*.json
+  ├── package.json
+  └── Dockerfile
+
+Root
+├── docker-compose.yml  # orchestration
+├── README.md
+└── Samples/  # test data
+   mongodb_sample.csv  •  postgresql.csv
+   sample1.csv  •  sample11.xlsx  •  sample111.json
+   temperature.csv
+
+
+═══════════════════════════════════════════════════════════════════
+TECHNOLOGY STACK
+═══════════════════════════════════════════════════════════════════
+
+Frontend:
+  • Angular 17
+  • Angular Material (UI components)
+  • TypeScript
+  • RxJS (Reactive programming)
+  • Axios (HTTP client)
+
+Backend:
+  • FastAPI (Python web framework)
+  • SQLite (Metadata storage)
+  • PostgreSQL / MongoDB / OpenSearch (Database options)
+  • Prometheus (Metrics)
+  • Pandas (Data processing)
+
+Infrastructure:
+  • Docker & Docker Compose
+  • Python 3.x
+  • Node.js & npm
+
+
+═══════════════════════════════════════════════════════════════════
+KEY FEATURES
+═══════════════════════════════════════════════════════════════════
+
+• Multi-Database Support (PostgreSQL, MongoDB, OpenSearch)
+• File Processing (CSV, Excel, JSON)
+• Data Visualization (Bar, Line, Pie charts with SVG)
+• Dashboard with statistics & file management
+• File upload with drag-and-drop & auto-upload
+• Data preview tables with pagination (10 items/page)
+• Authentication system (Login/Sign-up with route guards)
+• Responsive design with Angular Material
+
+
+═══════════════════════════════════════════════════════════════════
+FILE COUNT SUMMARY
+═══════════════════════════════════════════════════════════════════
+
+Backend: 7 Python files + 2 config files
+Frontend: 20 TypeScript components + 2 services + 1 guard + 4 config files
+Total: ~30+ source files
